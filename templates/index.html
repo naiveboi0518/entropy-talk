@@ -1,0 +1,1034 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>熵 · 从蒸汽机到时间之箭</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;700;900&display=swap');
+*{margin:0;padding:0;box-sizing:border-box}
+body{
+  font-family:'Noto Sans SC',-apple-system,sans-serif;
+  background:#000;color:#fff;overflow-x:hidden;
+  -webkit-font-smoothing:antialiased;
+}
+.topbar{
+  position:fixed;top:0;left:0;right:0;z-index:1000;
+  display:flex;justify-content:space-between;align-items:center;
+  padding:16px 30px;mix-blend-mode:difference;
+  font-size:13px;color:rgba(255,255,255,0.6);pointer-events:none;
+}
+.topbar a{color:#ff6b6b;text-decoration:none;pointer-events:auto;font-weight:700;font-size:12px;}
+.progress{position:fixed;top:0;left:0;height:2px;background:linear-gradient(90deg,#ff6b6b,#ffd93d);z-index:1001;transition:width .1s linear;}
+
+.hero{
+  min-height:100vh;display:flex;flex-direction:column;justify-content:center;align-items:center;
+  text-align:center;padding:80px 24px;position:relative;
+  background:radial-gradient(ellipse at 50% 30%,#1a1a3e 0%,#000 70%);
+}
+.hero .kicker{font-size:12px;letter-spacing:4px;text-transform:uppercase;color:rgba(255,255,255,0.3);margin-bottom:16px;}
+.hero h1{
+  font-size:clamp(40px,8vw,96px);font-weight:900;line-height:1.05;
+  background:linear-gradient(135deg,#fff 30%,#ff6b6b,#ffd93d);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:16px;
+}
+.hero .sub{font-size:clamp(16px,2vw,22px);color:rgba(255,255,255,0.4);font-weight:300;margin-bottom:40px;}
+.hero .video-wrap{width:min(85%,700px);aspect-ratio:16/9;border-radius:20px;overflow:hidden;box-shadow:0 30px 80px rgba(0,0,0,0.8);border:1px solid rgba(255,255,255,0.08);}
+.hero .video-wrap iframe{width:100%;height:100%;border:none;}
+.scroll-hint{position:absolute;bottom:30px;display:flex;flex-direction:column;align-items:center;gap:6px;color:rgba(255,255,255,0.2);font-size:11px;letter-spacing:2px;animation:bounce 2.5s infinite;}
+.scroll-hint .line{width:1px;height:30px;background:rgba(255,255,255,0.15);}
+@keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(6px)}}
+
+section{padding:120px 24px;position:relative;overflow:hidden;}
+.section-inner{max-width:720px;margin:0 auto;}
+.tag{font-size:11px;letter-spacing:3px;color:rgba(255,255,255,0.25);margin-bottom:8px;text-transform:uppercase;}
+h2{font-size:clamp(32px,5vw,56px);font-weight:700;line-height:1.1;margin-bottom:20px;}
+h2 .hl{color:#ff6b6b;}
+.lead{font-size:clamp(16px,2vw,21px);color:rgba(255,255,255,0.5);font-weight:300;line-height:1.7;margin-bottom:32px;}
+.body-text{font-size:15px;color:rgba(255,255,255,0.55);line-height:1.9;}
+
+.highlight{
+  background:linear-gradient(135deg,rgba(255,255,255,0.04),rgba(255,255,255,0.01));
+  border:1px solid rgba(255,255,255,0.06);border-radius:20px;
+  padding:36px 40px;margin:30px 0;text-align:center;backdrop-filter:blur(10px);
+}
+.highlight .big{font-size:clamp(22px,3vw,32px);font-weight:700;line-height:1.4;color:#fff;}
+.highlight .big .accent{color:#ffd93d;}
+.highlight .note{font-size:13px;color:rgba(255,255,255,0.3);margin-top:10px;}
+
+/* ─── SECTION IMAGES ─── */
+.section-img{
+  width:100%;max-width:480px;border-radius:16px;overflow:hidden;
+  margin:20px auto 0;border:1px solid rgba(255,255,255,0.06);
+  box-shadow:0 20px 60px rgba(0,0,0,0.5);
+  position:relative;
+}
+.section-img img{
+  width:100%;height:auto;display:block;
+  filter:brightness(0.85) contrast(1.1);
+  transition:filter .4s,transform .4s;
+}
+.section-img:hover img{filter:brightness(0.95) contrast(1.15);transform:scale(1.02);}
+.section-img::after{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(180deg,transparent 60%,rgba(0,0,0,0.6));
+  pointer-events:none;
+}
+
+/* ─── ICE MELT CANVAS ─── */
+.ice-melt-wrap{
+  width:min(400px,85vw);height:280px;margin:24px auto 0;position:relative;
+  border-radius:16px;overflow:hidden;border:1px solid rgba(255,255,255,0.06);
+  box-shadow:0 20px 60px rgba(0,0,0,0.5);
+}
+.ice-melt-wrap canvas{width:100%;height:100%;display:block;}
+.ice-melt-controls{
+  display:flex;justify-content:center;gap:12px;margin-top:12px;
+}
+.ice-melt-controls button{
+  padding:8px 20px;border-radius:20px;border:1px solid rgba(255,107,107,0.3);
+  background:rgba(255,107,107,0.08);color:#ff6b6b;font-weight:600;font-size:13px;
+  cursor:pointer;transition:all .3s;font-family:inherit;
+}
+.ice-melt-controls button:hover{background:rgba(255,107,107,0.15);border-color:rgba(255,107,107,0.5);}
+.ice-melt-controls button.active{background:rgba(255,107,107,0.2);border-color:#ff6b6b;}
+
+/* ─── DAILY CARDS UPGRADE ─── */
+.ex-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px;margin:30px 0;}
+.ex-card{
+  background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);
+  border-radius:20px;padding:20px;text-align:center;cursor:pointer;
+  opacity:0;transform:translateY(20px);transition:opacity 0.6s,transform 0.6s,border-color 0.4s,box-shadow 0.4s;
+  user-select:none;position:relative;overflow:hidden;
+}
+.ex-card.visible{opacity:1;transform:translateY(0);}
+.ex-card:hover{border-color:rgba(255,255,255,0.15);box-shadow:0 8px 30px rgba(0,0,0,0.3);}
+.ex-card .anim-stage{
+  width:100%;height:120px;position:relative;margin-bottom:8px;
+  display:flex;align-items:center;justify-content:center;
+}
+
+.ex-card .t{font-size:14px;color:rgba(255,255,255,0.5);line-height:1.4;position:relative;z-index:1;}
+.ex-card .t strong{color:#fff;font-size:15px;display:block;margin-bottom:3px;}
+.ex-card .click-hint{font-size:11px;color:rgba(255,255,255,0.12);transition:color 0.3s;}
+.ex-card:hover .click-hint{color:rgba(255,255,255,0.3);}
+.ex-card .card-glow{
+  position:absolute;top:50%;left:50%;width:200px;height:200px;
+  border-radius:50%;filter:blur(50px);opacity:0;transition:opacity 0.6s;
+  pointer-events:none;transform:translate(-50%,-50%);
+}
+.ex-card.playing{border-color:rgba(255,107,107,0.3);box-shadow:0 0 30px rgba(255,107,107,0.05);}
+.ex-card.playing .card-glow{opacity:0.15;}
+
+/* IMPACT */
+.imp-list{display:flex;flex-direction:column;gap:8px;margin:30px 0;}
+.imp-item{
+  display:flex;align-items:flex-start;gap:14px;padding:16px 20px;border-radius:12px;cursor:pointer;
+  background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.04);
+  opacity:0;transform:translateX(-20px);transition:all 0.6s cubic-bezier(0.2,0.8,0.2,1);
+  position:relative;user-select:none;
+}
+.imp-item.visible{opacity:1;transform:translateX(0);}
+.imp-item .i{font-size:20px;flex-shrink:0;margin-top:1px;}
+.imp-item .t{font-size:14px;color:rgba(255,255,255,0.55);line-height:1.6;flex:1;}
+.imp-item .t strong{color:#fff;display:block;margin-bottom:2px;}
+.imp-item .t .detail{display:none;margin-top:6px;padding-top:6px;border-top:1px solid rgba(255,255,255,0.06);font-size:13px;color:rgba(255,255,255,0.35);line-height:1.6;}
+.imp-item.expanded{border-color:rgba(255,255,255,0.15);background:rgba(255,255,255,0.05);}
+.imp-item.expanded .t .detail{display:block;animation:fadeUp 0.4s ease;}
+.imp-item .expand-hint{font-size:10px;color:rgba(255,255,255,0.15);position:absolute;right:12px;top:50%;transform:translateY(-50%);transition:transform 0.3s;}
+.imp-item.expanded .expand-hint{transform:translateY(-50%) rotate(45deg);}
+
+.s-interactive{background:radial-gradient(ellipse at 50% 50%,#1a1a3e 0%,#000 70%);}
+.ia{display:flex;gap:30px;align-items:center;flex-wrap:wrap;justify-content:center;margin:30px 0;}
+.cw{background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:16px;padding:12px;}
+#mc{border-radius:10px;width:min(400px,80vw);height:260px;}
+.cp{display:flex;flex-direction:column;gap:14px;align-items:center;min-width:160px;}
+.cp .tl{font-size:12px;color:rgba(255,255,255,0.3);letter-spacing:2px;text-transform:uppercase;}
+.ts{width:200px;height:4px;-webkit-appearance:none;border-radius:2px;outline:none;background:linear-gradient(90deg,#6bcbff,#ffd93d,#ff6b6b);}
+.ts::-webkit-slider-thumb{-webkit-appearance:none;width:22px;height:22px;border-radius:50%;background:#fff;border:none;cursor:pointer;box-shadow:0 2px 10px rgba(0,0,0,0.5);}
+.td{font-size:28px;font-weight:700;color:#fff;}
+.em{text-align:center;}
+.em .v{font-size:36px;font-weight:700;color:#ffd93d;}
+.em .l{font-size:11px;color:rgba(255,255,255,0.2);text-transform:uppercase;letter-spacing:2px;}
+
+.closing{text-align:center;padding:60px 0;border-top:1px solid rgba(255,255,255,0.06);margin-top:40px;}
+.closing .q{font-size:clamp(18px,3vw,28px);font-weight:300;line-height:1.6;color:rgba(255,255,255,0.6);}
+.closing .q .h{color:#ffd93d;font-weight:700;}
+.closing .tag{font-size:20px;font-weight:700;color:#ff6b6b;margin-top:20px;}
+.closing .cta{margin-top:30px;}
+.closing .cta a{display:inline-block;padding:14px 36px;border-radius:30px;background:linear-gradient(135deg,#ff6b6b,#ffd93d);color:#000;font-weight:700;text-decoration:none;font-size:15px;transition:transform 0.3s;}
+.closing .cta a:hover{transform:scale(1.05);}
+.closing .cta .sub{font-size:12px;color:rgba(255,255,255,0.2);margin-top:8px;}
+
+.script-toggle{
+  position:fixed;bottom:24px;right:24px;z-index:999;
+  padding:10px 18px;border-radius:20px;border:1px solid rgba(255,255,255,0.1);
+  background:rgba(0,0,0,0.6);backdrop-filter:blur(12px);
+  color:rgba(255,255,255,0.4);font-size:12px;cursor:pointer;transition:all 0.3s;font-family:inherit;
+}
+.script-toggle:hover{border-color:rgba(255,255,255,0.3);color:#fff;}
+.script-toggle.on{border-color:#ff6b6b;color:#ff6b6b;}
+.sticky-notes{position:sticky;top:0;z-index:10;background:rgba(0,0,0,0.8);backdrop-filter:blur(20px);padding:12px 24px;border-bottom:1px solid rgba(255,255,255,0.05);display:none;}
+.sticky-notes.show{display:block;}
+.sticky-notes .script{font-size:13px;color:rgba(255,255,255,0.5);line-height:1.6;max-width:720px;margin:0 auto;}
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+/* ─── GLM EXPLAIN PANEL ─── */
+.explain-btn{
+  display:inline-flex;align-items:center;gap:6px;
+  padding:8px 16px;border-radius:20px;border:1px solid rgba(255,107,107,0.25);
+  background:rgba(255,107,107,0.06);color:#ff6b6b;font-size:13px;font-weight:600;
+  cursor:pointer;transition:all .3s;font-family:inherit;margin-top:12px;
+}
+.explain-btn:hover{background:rgba(255,107,107,0.12);border-color:rgba(255,107,107,0.5);transform:translateY(-1px);}
+.explain-btn.loading{pointer-events:none;opacity:0.6;}
+.explain-btn.loading .btn-icon{animation:spin 1s linear infinite;}
+@keyframes spin{from{transform:rotate(0)}to{transform:rotate(360deg)}}
+
+.explain-panel{
+  max-height:0;overflow:hidden;transition:max-height .5s cubic-bezier(0.2,0.8,0.2,1),opacity .4s,margin .4s;
+  opacity:0;margin-top:0;
+}
+.explain-panel.open{max-height:600px;opacity:1;margin-top:16px;}
+.explain-panel .inner{
+  background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);
+  border-radius:16px;padding:24px 28px;position:relative;
+}
+.explain-panel .inner::before{
+  content:'';position:absolute;top:-1px;left:30px;width:40px;height:2px;
+  background:linear-gradient(90deg,#ff6b6b,#ffd93d);border-radius:1px;
+}
+.explain-panel .reply{
+  font-size:15px;color:rgba(255,255,255,0.7);line-height:1.9;
+}
+.explain-panel .reply .katex-display{margin:12px 0;overflow-x:auto;overflow-y:hidden;padding:4px 0;}
+.explain-panel .reply .katex{font-size:1.05em;}
+.explain-panel .close-btn{
+  position:absolute;top:10px;right:12px;background:none;border:none;
+  color:rgba(255,255,255,0.2);font-size:18px;cursor:pointer;transition:color .2s;
+  width:28px;height:28px;display:flex;align-items:center;justify-content:center;border-radius:50%;
+}
+.explain-panel .close-btn:hover{color:#ff6b6b;background:rgba(255,107,107,0.1);}
+
+.ask-box{
+  display:flex;gap:8px;margin-top:14px;
+}
+.ask-box input{
+  flex:1;padding:10px 14px;border-radius:10px;border:1px solid rgba(255,255,255,0.1);
+  background:rgba(255,255,255,0.04);color:#fff;font-size:14px;font-family:inherit;
+  outline:none;transition:border-color .3s;
+}
+.ask-box input::placeholder{color:rgba(255,255,255,0.2);}
+.ask-box input:focus{border-color:rgba(255,107,107,0.4);}
+.ask-box button{
+  padding:10px 18px;border-radius:10px;border:none;
+  background:linear-gradient(135deg,#ff6b6b,#ffd93d);color:#000;font-weight:700;
+  font-size:13px;cursor:pointer;transition:transform .2s;font-family:inherit;white-space:nowrap;
+}
+.ask-box button:hover{transform:scale(1.03);}
+
+@media(max-width:768px){section{padding:80px 20px;}.topbar{padding:12px 16px;font-size:11px;}.highlight{padding:24px 20px;}.ask-box{flex-direction:column;}.explain-panel .inner{padding:18px 16px;}}
+
+/* ─── DAILY CARD — SIMPLE CROSSFADE ─── */
+.anim-stage{position:relative;width:100%;height:100%;overflow:hidden;border-radius:12px;}
+.card-after,.card-before{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;border-radius:12px;}
+.card-before{z-index:2;transition:opacity 2s ease;}
+.card-after{z-index:1;}
+.ex-card.playing .card-before{opacity:0;}
+
+</style>
+</head>
+<body>
+<div class="topbar"><span>熵 · 物理pre</span><a href="http://47.107.36.34" target="_blank">📚 期末复习站 →</a></div>
+<div class="progress" id="progress"></div>
+<button class="script-toggle" id="scriptToggle">📜 讲解词</button>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="kicker">热力学第二定律 · 专题讲解</div>
+  <h1>如果熵可以逆转？</h1>
+  <p class="sub">从《信条》里的时间逆转，到宇宙不可逆的方向</p>
+  <div class="video-wrap"><iframe src="https://player.bilibili.com/player.html?bvid=BV1yy4y1z72d&page=1&autoplay=0" allowfullscreen loading="lazy"></iframe></div>
+  <div class="scroll-hint"><span>向下滚动</span><div class="line"></div></div>
+</div>
+
+<!-- STORY SECTIONS -->
+<section><div class="section-inner">
+  <div class="tag">1824 · 法国</div>
+  <h2>一台机器引发的<span class="hl">疑问</span></h2>
+  <p class="lead">卡诺在改良蒸汽机时发现——热总是从高温流向低温，永远不可能反过来。</p>
+  <div class="section-img" id="img-carnot"><img src="/static/images/carnot.png" alt="蒸汽机" loading="lazy" onerror="this.parentElement.style.display='none'"></div>
+  <button class="explain-btn" data-topic="卡诺循环与热力学第二定律的起源"><span class="btn-icon">💡</span> 详细讲解</button>
+  <div class="explain-panel"><div class="inner"><button class="close-btn">&times;</button><div class="reply"></div><div class="ask-box"><input type="text" placeholder="追问：比如"为什么热不能倒流？""><button>提问</button></div></div></div>
+</div></section>
+<section><div class="section-inner">
+  <div class="tag">1865 · 德国</div>
+  <h2>一个词被<span class="hl">造了出来</span></h2>
+  <p class="lead">克劳修斯造出了"熵"——热量转变的度量。</p>
+  <div class="section-img" id="img-clausius"><img src="/static/images/clausius.png" alt="克劳修斯" loading="lazy" onerror="this.parentElement.style.display='none'"></div>
+  <button class="explain-btn" data-topic="克劳修斯熵的定义 dS≥δQ/T"><span class="btn-icon">💡</span> 详细讲解</button>
+  <div class="explain-panel"><div class="inner"><button class="close-btn">&times;</button><div class="reply"></div><div class="ask-box"><input type="text" placeholder="追问：比如"克劳修斯不等式怎么推导？""><button>提问</button></div></div></div>
+</div></section>
+<section><div class="section-inner">
+  <div class="tag">1877 · 奥地利</div>
+  <h2>熵 = <span class="hl">混乱程度</span></h2>
+  <p class="lead">玻尔兹曼说：混乱的排列方式远远多于整齐的。</p>
+  <div class="section-img" id="img-boltzmann"><img src="/static/images/boltzmann.png" alt="玻尔兹曼" loading="lazy" onerror="this.parentElement.style.display='none'"></div>
+  <button class="explain-btn" data-topic="玻尔兹曼熵公式 S=k ln W 及其统计物理意义"><span class="btn-icon">💡</span> 详细讲解</button>
+  <div class="explain-panel"><div class="inner"><button class="close-btn">&times;</button><div class="reply"></div><div class="ask-box"><input type="text" placeholder="追问：比如"微观状态数W怎么算？""><button>提问</button></div></div></div>
+</div></section>
+<section><div class="section-inner" style="text-align:center;">
+  <div class="tag">最经典的例子</div>
+  <h2>🧊 冰块融化</h2>
+  <div class="highlight"><div class="big">🧊 整齐 → <span class="accent">低熵</span> ⬇️ 💧 自由乱跑 → <span class="accent">高熵</span></div></div>
+  <div class="ice-melt-wrap">
+    <canvas id="iceCanvas" width="400" height="280"></canvas>
+  </div>
+  <div class="ice-melt-controls">
+    <button id="icePlay" class="active">▶ 融化</button>
+    <button id="iceReset">🔄 重置</button>
+  </div>
+  <button class="explain-btn" data-topic="冰块融化过程中熵变的物理机制"><span class="btn-icon">💡</span> 详细讲解</button>
+  <div class="explain-panel"><div class="inner"><button class="close-btn">&times;</button><div class="reply"></div><div class="ask-box"><input type="text" placeholder="追问：比如"融化时熵变怎么算？""><button>提问</button></div></div></div>
+</div></section>
+
+<!-- ═══ DAILY CARDS — BEFORE/AFTER TRANSITION ═══ -->
+<section><div class="section-inner">
+  <div class="tag">👆 点一下看熵增</div>
+  <h2>你的生活里<span class="hl">全是它</span></h2>
+  <p class="lead">点卡片看熵增过程</p>
+  <div class="ex-grid" id="dailyGrid">
+
+    <div class="ex-card" data-anim="room">
+      <div class="card-glow" style="background:#ff6b6b;"></div>
+      <div class="anim-stage">
+        <img class="card-img card-after" src="/static/images/room_after.png" alt="" loading="lazy">
+        <img class="card-img card-before" src="/static/images/room_before.png" alt="房间" loading="lazy">
+
+      </div>
+      <div class="t"><strong>🛏️ 房间变乱</strong><span class="click-hint">点击看物品飞散</span></div>
+    </div>
+
+    <div class="ex-card" data-anim="fruit">
+      <div class="card-glow" style="background:#6bcbff;"></div>
+      <div class="anim-stage">
+        <img class="card-img card-after" src="/static/images/fruit_after.png" alt="" loading="lazy">
+        <img class="card-img card-before" src="/static/images/fruit_before.png" alt="水果" loading="lazy">
+
+      </div>
+      <div class="t"><strong>🍎 水果变质</strong><span class="click-hint">点击看发霉腐烂</span></div>
+    </div>
+
+    <div class="ex-card" data-anim="headphone">
+      <div class="card-glow" style="background:#a29bfe;"></div>
+      <div class="anim-stage">
+        <img class="card-img card-after" src="/static/images/headphone_after.png" alt="" loading="lazy">
+        <img class="card-img card-before" src="/static/images/headphone_before.png" alt="耳机" loading="lazy">
+
+      </div>
+      <div class="t"><strong>🎧 有线耳机打结</strong><span class="click-hint">点击看线缠住</span></div>
+    </div>
+
+    <div class="ex-card" data-anim="egg">
+      <div class="card-glow" style="background:#ffd93d;"></div>
+      <div class="anim-stage">
+        <img class="card-img card-after" src="/static/images/egg_after.png" alt="" loading="lazy">
+        <img class="card-img card-before" src="/static/images/egg_before.png" alt="鸡蛋" loading="lazy">
+
+      </div>
+      <div class="t"><strong>🥚 鸡蛋碎了</strong><span class="click-hint">点击看蛋壳破裂</span></div>
+    </div>
+
+    <div class="ex-card" data-anim="ice">
+      <div class="card-glow" style="background:#6bcbff;"></div>
+      <div class="anim-stage">
+        <img class="card-img card-after" src="/static/images/ice_after.png" alt="" loading="lazy">
+        <img class="card-img card-before" src="/static/images/ice_before.png" alt="冰块" loading="lazy">
+
+      </div>
+      <div class="t"><strong>🧊 冰块融化</strong><span class="click-hint">点击看冰慢慢化</span></div>
+    </div>
+
+  </div>
+</div></section>
+
+<!-- IMPACT SECTIONS -->
+<section><div class="section-inner">
+  <div class="tag">👆 点击展开</div>
+  <h2>你的身体就是一台<span class="hl">抗熵机器</span></h2>
+  <div class="imp-list">
+    <div class="imp-item"><span class="i">🍔</span><div class="t"><strong>吃饭 = 摄取低熵</strong>食物是低熵高能量。<div class="detail">⚡ 人体每天约2000大卡维持有序。不吃=熵死。所以吃饭是物理定律！</div></div><span class="expand-hint">+</span></div>
+    <div class="imp-item"><span class="i">🧬</span><div class="t"><strong>衰老 = 熵增</strong>DNA复制出错=微观熵增。<div class="detail">⏳ 每天约10¹⁴次细胞分裂，错误积累=衰老。不可逆。</div></div><span class="expand-hint">+</span></div>
+    <div class="imp-item"><span class="i">😷</span><div class="t"><strong>生病 = 熵失衡</strong>健康=低熵有序。<div class="detail">🌡️ 发烧发炎都是熵在局部爆发。</div></div><span class="expand-hint">+</span></div>
+    <div class="imp-item"><span class="i">☀️</span><div class="t"><strong>太阳 = 地球的熵泵</strong>太阳送来低熵能量。<div class="detail">☀️ 每秒4×10²⁶W。没有太阳→生命停止。</div></div><span class="expand-hint">+</span></div>
+  </div>
+  <button class="explain-btn" data-topic="生命如何对抗熵增：薛定谔《生命是什么》的负熵理论"><span class="btn-icon">💡</span> 详细讲解</button>
+  <div class="explain-panel"><div class="inner"><button class="close-btn">&times;</button><div class="reply"></div><div class="ask-box"><input type="text" placeholder="追问：比如"为什么只有生命能局部减熵？""><button>提问</button></div></div></div>
+  <div class="section-img" id="img-life"><img src="/static/images/life.png" alt="生命与熵" loading="lazy" onerror="this.parentElement.style.display='none'"></div>
+</div></section>
+<section><div class="section-inner">
+  <div class="tag">👆 点击展开</div>
+  <h2>大到宇宙也在<span class="hl">熵增</span></h2>
+  <div class="imp-list">
+    <div class="imp-item"><span class="i">📱</span><div class="t"><strong>信息也会熵增</strong>硬盘会坏、记忆会模糊。<div class="detail">💾 备份=对抗熵。记不清小时候的事？记忆在熵增。</div></div><span class="expand-hint">+</span></div>
+    <div class="imp-item"><span class="i">🏗️</span><div class="t"><strong>文明 = 局部减熵</strong>城市是低熵岛。<div class="detail">🏙️ 代价是环境熵增。</div></div><span class="expand-hint">+</span></div>
+    <div class="imp-item"><span class="i">♾️</span><div class="t"><strong>宇宙热寂</strong>所有能量均匀分布。<div class="detail">🌌 10¹⁰⁰年后。别担心。</div></div><span class="expand-hint">+</span></div>
+  </div>
+  <button class="explain-btn" data-topic="宇宙热寂与信息熵：香农熵和热力学熵的统一"><span class="btn-icon">💡</span> 详细讲解</button>
+  <div class="explain-panel"><div class="inner"><button class="close-btn">&times;</button><div class="reply"></div><div class="ask-box"><input type="text" placeholder="追问：比如"信息熵和热力学熵有什么关系？""><button>提问</button></div></div></div>
+  <div class="section-img" id="img-universe"><img src="/static/images/universe.png" alt="宇宙热寂" loading="lazy" onerror="this.parentElement.style.display='none'"></div>
+</div></section>
+
+<section class="s-interactive"><div class="section-inner">
+  <div class="tag" style="text-align:center;">试试看</div>
+  <h2 style="text-align:center;">拖一下<span class="hl">温度</span></h2>
+  <div class="ia"><div class="cw"><canvas id="mc" width="400" height="260"></canvas></div>
+    <div class="cp"><div class="tl">温度</div><div class="td" id="td">300 K</div><input type="range" id="ts" class="ts" min="0" max="1000" value="300">
+    <div class="em"><div class="l">熵值</div><div class="v" id="ev">4.2</div></div></div>
+  </div>
+  <div class="closing">
+    <div class="q">"熵不是一个概念 — <span class="h">它是时间本身存在的理由</span>。"<br>每一次整理房间都在<strong style="color:#fff;">对抗宇宙的懒惰</strong>。</div>
+    <div class="tag">"这是热力学第二定律" 😎</div>
+    <div class="cta"><a href="http://47.107.36.34" target="_blank">📚 去复习站看看</a><div class="sub">暨大期末复习站 · 真题+解析+AI解题</div></div>
+  </div>
+</div></section>
+
+<!-- Sticky notes panel -->
+<div class="sticky-notes" id="stickyNotes"><div class="script">这是预留给讲解词的区域。</div></div>
+
+<script>
+// ═════════════════════════════════════════════════════════
+// 1. Scroll triggers — IntersectionObserver + progress bar
+// ═════════════════════════════════════════════════════════
+(function(){
+  const obs = new IntersectionObserver(function(entries){
+    entries.forEach(function(en){
+      if(en.isIntersecting){
+        en.target.classList.add('visible');
+      }
+    });
+  }, {threshold:0.15});
+
+  document.querySelectorAll('.ex-card, .imp-item').forEach(function(el){
+    obs.observe(el);
+    el.style.transitionDelay = el.dataset.delay || '0s';
+  });
+
+  var pBar = document.getElementById('progress');
+  window.addEventListener('scroll', function(){
+    var h = document.documentElement.scrollHeight - window.innerHeight;
+    pBar.style.width = ((window.scrollY / h) * 100) + '%';
+  });
+})();
+
+// ═════════════════════════════════════════════════════════
+// 2. Daily card — click to crossfade before → after
+// ═════════════════════════════════════════════════════════
+(function(){
+  document.querySelectorAll('.ex-card').forEach(function(card){
+    var timer=null;
+    card.addEventListener('click',function(){
+      if(timer){clearTimeout(timer);timer=null;}
+      if(card.classList.contains('playing')){
+        card.classList.remove('playing');
+      } else {
+        card.classList.add('playing');
+        timer=setTimeout(function(){
+          card.classList.remove('playing');
+          timer=null;
+        },5000);
+      }
+    });
+  });
+})();
+
+// ═════════════════════════════════════════════════════════
+// 3. Impact item click — toggle .expanded
+// ═════════════════════════════════════════════════════════
+(function(){
+  document.querySelectorAll('.imp-item').forEach(function(item){
+    item.addEventListener('click', function(e){
+      item.classList.toggle('expanded');
+    });
+  });
+})();
+
+// ═════════════════════════════════════════════════════════
+// 4. Script toggle — show/hide sticky notes
+// ═════════════════════════════════════════════════════════
+(function(){
+  var toggle = document.getElementById('scriptToggle');
+  var notes = document.getElementById('stickyNotes');
+  if(toggle && notes){
+    toggle.addEventListener('click', function(){
+      notes.classList.toggle('show');
+      toggle.classList.toggle('on');
+      if(notes.classList.contains('show')){
+        toggle.textContent = '📜 隐藏讲解词';
+      } else {
+        toggle.textContent = '📜 讲解词';
+      }
+    });
+  }
+})();
+
+// ═════════════════════════════════════════════════════════
+// 5. ICE MELT CANVAS — roundRect + full animation
+// ═════════════════════════════════════════════════════════
+(function(){
+  var ic = document.getElementById('iceCanvas');
+  if(!ic) return;
+  var ctx = ic.getContext('2d');
+  var W = ic.width, H = ic.height;
+  var meltProgress = 0;
+  var melting = false;
+  var drops = [];
+
+  // roundRect helper
+  function roundRect(ctx, x, y, w, h, r){
+    if(r > w/2) r = w/2;
+    if(r > h/2) r = h/2;
+    ctx.beginPath();
+    ctx.moveTo(x + r, y);
+    ctx.lineTo(x + w - r, y);
+    ctx.arcTo(x + w, y, x + w, y + r, r);
+    ctx.lineTo(x + w, y + h - r);
+    ctx.arcTo(x + w, y + h, x + w - r, y + h, r);
+    ctx.lineTo(x + r, y + h);
+    ctx.arcTo(x, y + h, x, y + h - r, r);
+    ctx.lineTo(x, y + r);
+    ctx.arcTo(x, y, x + r, y, r);
+    ctx.closePath();
+  }
+
+  var ice = {x: W/2, y: H*0.38, w: 100, h: 110, r: 8};
+
+  // Ice crystal lines
+  var crackLines = [];
+  for(var i = 0; i < 8; i++){
+    crackLines.push({
+      x: (Math.random() - 0.5) * 60,
+      y: (Math.random() - 0.5) * 70,
+      len: 10 + Math.random() * 20,
+      angle: Math.random() * Math.PI * 2
+    });
+  }
+
+  function spawnDrops(count){
+    for(var i = 0; i < count; i++){
+      var shrink = 1 - meltProgress * 0.7;
+      var iw = ice.w * shrink;
+      var ix = W/2 - iw/2;
+      drops.push({
+        x: ix + Math.random() * iw,
+        y: ice.y + 10 + Math.random() * 20,
+        vy: 0.5 + Math.random() * 1.0,
+        life: 60 + Math.floor(Math.random() * 40),
+        maxLife: 100
+      });
+    }
+  }
+
+  function drawScene(p){
+    ctx.clearRect(0,0,W,H);
+
+    // Background
+    var bg = ctx.createLinearGradient(0,0,0,H);
+    bg.addColorStop(0,'#0a0a1a');
+    bg.addColorStop(1,'#0d1117');
+    ctx.fillStyle = bg;
+    ctx.fillRect(0,0,W,H);
+
+    // Puddle
+    var puddleW = ice.w * 0.6 + p * 120;
+    var puddleH = 8 + p * 25;
+    var puddleY = H * 0.78;
+    var pg = ctx.createRadialGradient(W/2, puddleY, 0, W/2, puddleY, puddleW/2);
+    pg.addColorStop(0, 'rgba(107,203,255,' + (0.12 + p * 0.15) + ')');
+    pg.addColorStop(1, 'rgba(107,203,255,0)');
+    ctx.fillStyle = pg;
+    ctx.beginPath();
+    ctx.ellipse(W/2, puddleY, puddleW/2, puddleH, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Puddle surface shimmer
+    if(p > 0.3){
+      for(var si = 0; si < 3; si++){
+        ctx.beginPath();
+        ctx.ellipse(
+          W/2 + (Math.sin(Date.now()/800 + si*2) * puddleW*0.2),
+          puddleY + (Math.cos(Date.now()/600 + si*1.5) * 3),
+          8 + p*15, 2, 0, 0, Math.PI * 2
+        );
+        ctx.fillStyle = 'rgba(200,230,255,' + (0.02 + p * 0.04) + ')';
+        ctx.fill();
+      }
+    }
+
+    // Water drops falling
+    for(var i = drops.length-1; i >= 0; i--){
+      var d = drops[i];
+      d.y += d.vy;
+      d.vy += 0.15;
+      d.life--;
+      if(d.life <= 0){ drops.splice(i,1); continue; }
+      // Tear shape
+      ctx.beginPath();
+      ctx.arc(d.x, d.y, 2 + (1 - d.life/d.maxLife)*0.5, 0, Math.PI * 2);
+      ctx.fillStyle = 'rgba(107,203,255,' + ((d.life/d.maxLife) * 0.6) + ')';
+      ctx.fill();
+    }
+
+    // Ice block
+    var shrink = 1 - p * 0.7;
+    var iw = ice.w * shrink;
+    var ih = ice.h * shrink;
+    var ix = W/2 - iw/2;
+    var iy = ice.y - ih/2 + ih * 0.3 * p;
+
+    if(shrink > 0.05){
+      // Ice body
+      var ig = ctx.createLinearGradient(ix, iy, ix+iw, iy+ih);
+      ig.addColorStop(0, 'rgba(180,220,255,0.35)');
+      ig.addColorStop(0.4, 'rgba(140,200,255,0.25)');
+      ig.addColorStop(1, 'rgba(100,180,255,0.15)');
+      ctx.fillStyle = ig;
+      roundRect(ctx, ix, iy, iw, ih, 8 * shrink);
+      ctx.fill();
+
+      // Ice border
+      ctx.strokeStyle = 'rgba(180,220,255,' + (0.15 + (1-p)*0.15) + ')';
+      ctx.lineWidth = 1.5;
+      roundRect(ctx, ix, iy, iw, ih, 8 * shrink);
+      ctx.stroke();
+
+      // Crystal cracks / facets
+      ctx.strokeStyle = 'rgba(200,240,255,' + ((1-p)*0.12) + ')';
+      ctx.lineWidth = 0.8;
+      for(var ci = 0; ci < crackLines.length; ci++){
+        var cr = crackLines[ci];
+        var cx = ix + iw/2 + cr.x * shrink;
+        var cy = iy + ih/2 + cr.y * shrink;
+        ctx.beginPath();
+        ctx.moveTo(cx, cy);
+        ctx.lineTo(cx + Math.cos(cr.angle) * cr.len * shrink,
+                    cy + Math.sin(cr.angle) * cr.len * shrink);
+        ctx.stroke();
+      }
+
+      // Highlight on ice
+      var hlx = ix + iw * 0.2;
+      var hly = iy + ih * 0.15;
+      var hlw = iw * 0.15;
+      var hlh = ih * 0.2;
+      ctx.beginPath();
+      ctx.ellipse(hlx, hly, hlw, hlh, -0.3, 0, Math.PI * 2);
+      ctx.fillStyle = 'rgba(255,255,255,0.08)';
+      ctx.fill();
+    }
+
+    // Entropy label
+    ctx.fillStyle = 'rgba(255,255,255,0.15)';
+    ctx.font = '11px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('S = ' + (1 + p * 9).toFixed(1) + ' (熵值)', W/2, H - 8);
+
+    // Label: low entropy / high entropy
+    ctx.fillStyle = 'rgba(107,203,255,0.4)';
+    ctx.font = '10px sans-serif';
+    ctx.textAlign = 'left';
+    ctx.fillText('低熵 ←', 10, H - 8);
+    ctx.textAlign = 'right';
+    ctx.fillText('→ 高熵', W - 10, H - 8);
+  }
+
+  function animateIce(){
+    if(melting && meltProgress < 1){
+      meltProgress += 0.003;
+      if(meltProgress > 1) meltProgress = 1;
+
+      // Spawn drops periodically
+      if(Math.random() < 0.08 + meltProgress * 0.12){
+        spawnDrops(1 + Math.floor(Math.random() * 2));
+      }
+    }
+    drawScene(meltProgress);
+    requestAnimationFrame(animateIce);
+  }
+
+  // Play button
+  var playBtn = document.getElementById('icePlay');
+  if(playBtn){
+    playBtn.addEventListener('click', function(){
+      if(meltProgress >= 1){
+        // If fully melted, reset first
+        meltProgress = 0;
+        drops.length = 0;
+      }
+      melting = true;
+      playBtn.classList.add('active');
+    });
+  }
+
+  // Reset button
+  var resetBtn = document.getElementById('iceReset');
+  if(resetBtn){
+    resetBtn.addEventListener('click', function(){
+      melting = false;
+      meltProgress = 0;
+      drops.length = 0;
+      if(playBtn) playBtn.classList.add('active');
+    });
+  }
+
+  animateIce();
+})();
+
+// ═════════════════════════════════════════════════════════
+// 6. GLM Explain Panel — pre-written content + toggle + KaTeX
+// ═════════════════════════════════════════════════════════
+(function(){
+  // Pre-written explanations (simplified, ~200 chars each)
+  var explanations = {
+    '卡诺循环与热力学第二定律的起源':
+      '<p>1824年，法国工程师卡诺研究蒸汽机效率时发现了一个硬道理：热总是从高温流向低温，反过来不行。他设计了一个理想热机模型——<strong>卡诺循环</strong>：高温热库吸热 → 做功 → 低温热库放热，循环往复。</p>' +
+      '<p>他推导出卡诺热机的效率上限：</p>' +
+      '$$\\eta = 1 - \\frac{T_c}{T_h}$$' +
+      '<p>$T_h$ 是高温热库温度，$T_c$ 是低温热库温度。温差越大效率越高，但永远达不到100%。这直接引出热力学第二定律：<strong>热量不可能自发地从低温物体流向高温物体</strong>。总有一部分能量"废掉"了——这就是熵的起源。</p>',
+
+    '克劳修斯熵的定义 dS≥δQ/T':
+      '<p>1865年，德国物理学家克劳修斯给这个"废掉"的能量起了个名字——<strong>熵</strong>（entropy，希腊语"转变"之意）。他发现：对于可逆过程，熵变等于吸热除以温度：</p>' +
+      '$$dS = \\frac{\\delta Q}{T}$$' +
+      '<p>对于不可逆过程（现实中的绝大多数过程），熵变更大：</p>' +
+      '$$dS \\geq \\frac{\\delta Q}{T}$$' +
+      '<p>这就是<strong>克劳修斯不等式</strong>。如果系统是孤立的（不跟外界交换热量），则 $\\delta Q = 0$，所以：</p>' +
+      '$$dS \\geq 0$$' +
+      '<p><strong>孤立系统的熵永远不会减少</strong>——这就是热力学第二定律最简洁的数学表达。房间不会自己变整洁、碎杯子不会自己复原，根源就在这里。</p>',
+
+    '玻尔兹曼熵公式 S=k ln W 及其统计物理意义':
+      '<p>克劳修斯给了熵的宏观定义，1877年奥地利物理学家玻尔兹曼找到了它的微观本质。</p>' +
+      '<p>他想的是：一盒气体，所有分子都挤在左边只有1种排列方式；均匀分布的话，每个分子有左/右两种选择，$N$ 个分子就有 $2^N$ 种排列。显然均匀分布的排列方式多得多——系统自然倾向于往可能性更大的方向演化。</p>' +
+      '<p>玻尔兹曼把这个直觉写成了一个公式：</p>' +
+      '$$S = k_B \\ln W$$' +
+      '<p>$k_B$ 是玻尔兹曼常数（$1.38 \\times 10^{-23}$ J/K），$W$ 是微观状态数。$W$ 越大，熵越大。<strong>熵 = 系统微观状态的度量</strong>，热力学第二定律本质上就是统计规律——系统总往微观状态更多的方向走。</p>',
+
+    '冰块融化过程中熵变的物理机制':
+      '<p>冰块融化是理解熵最直观的例子。冰是固态，水分子整齐排列在晶体里，只能原地振动——高度有序，<strong>低熵</strong>。液态水分子可以自由移动——自由度大增，<strong>高熵</strong>。</p>' +
+      '<p>冰在0°C融化时吸热，熵变可以这样算：</p>' +
+      '$$\\Delta S = \\frac{Q}{T} = \\frac{\\Delta H_{fus}}{T_m}$$' +
+      '<p>$\\Delta H_{fus}$ 是熔化热（冰=6.01 kJ/mol），$T_m$ 是熔点（273.15 K）。代入得 $\\Delta S \\approx 22.0$ J/(mol·K)。每融化18克冰，熵就增加这么多。</p>' +
+      '<p>从微观角度看：分子从"钉"在晶格上变成到处乱跑，自由度猛增。所以冰融化本质上是系统在追求更多微观状态——从有序走向无序，自发的、不可逆的。</p>',
+
+    '生命如何对抗熵增：薛定谔《生命是什么》的负熵理论':
+      '<p>既然孤立系统熵只增不减，生命体越来越有序，难道违反了第二定律？</p>' +
+      '<p>1944年薛定谔在《生命是什么》中给出了经典回答：<strong>生命以负熵为食</strong>。关键在于——生命体不是孤立系统。你吃饭、呼吸，都是在从外界摄入低熵物质，排出高熵废物。</p>' +
+      '<p>用公式看：</p>' +
+      '$$\\Delta S_{total} = \\Delta S_{\\text{生命体}} + \\Delta S_{\\text{环境}} \\geq 0$$' +
+      '<p>生命体内部熵减少（变得更有序），但环境熵增加得更多，总熵仍然≥0，完全不违反第二定律。</p>' +
+      '<p>生命本质上是三台抗熵机器：新陈代谢（拆解食物释放能量维持有序）、DNA存储信息（高度有序的低熵分子）、细胞修复与复制（不断重置熵增）。我们活着的每一秒都在用环境熵增的代价换取自身延续。</p>',
+
+    '宇宙热寂与信息熵：香农熵和热力学熵的统一':
+      '<p>把视角拉到宇宙尺度：宇宙（近似）孤立系统，熵一直增加。恒星燃尽、温度差消失、一切均匀——这就是<strong>热寂</strong>。不过那是 $10^{100}$ 年后的事了。</p>' +
+      '<p>更有意思的是：1948年香农研究通信问题时，定义了<strong>信息熵</strong>：</p>' +
+      '$$H = -\\sum_i p_i \\log_2 p_i$$' +
+      '<p>$p_i$ 是符号出现的概率。消息越随机、越不可预测，信息熵越大。"aaaaaa"信息熵低，乱码信息熵高。</p>' +
+      '<p>这个公式和玻尔兹曼熵 $S = k_B \\ln W$ 数学上完全统一——信息熵和热力学熵是同一回事，只差一个常数 $k_B$。这意味着<strong>信息本身就是物理的</strong>：删除数据也要消耗能量、产生热量（兰道尔原理）。热力学熵衡量微观状态的不确定性，信息熵衡量知识的缺失——它们说的是同一件事。</p>'
+  };
+
+  // Helper: render KaTeX in a container
+  function renderMath(container){
+    if(typeof renderMathInElement === 'function'){
+      try {
+        renderMathInElement(container, {
+          delimiters: [
+            {left: '$$', right: '$$', display: true},
+            {left: '$', right: '$', display: false}
+          ],
+          throwOnError: false
+        });
+      } catch(e) {
+        // Silently fail if KaTeX errors on some input
+      }
+    }
+  }
+
+  // Handle explain button clicks
+  document.querySelectorAll('.explain-btn').forEach(function(btn){
+    btn.addEventListener('click', function(e){
+      var topic = btn.getAttribute('data-topic');
+      var panel = btn.nextElementSibling;
+      if(!panel || !panel.classList.contains('explain-panel')) return;
+
+      // If this panel is already open, close it
+      if(panel.classList.contains('open')){
+        panel.classList.remove('open');
+        return;
+      }
+
+      // Close all other panels first
+      document.querySelectorAll('.explain-panel.open').forEach(function(op){
+        op.classList.remove('open');
+      });
+
+      // Get or create the reply content div
+      var replyDiv = panel.querySelector('.reply');
+      if(!replyDiv) return;
+
+      // Fill with pre-written content
+      var content = explanations[topic];
+      if(content){
+        replyDiv.innerHTML = content;
+        // Render KaTeX
+        renderMath(replyDiv);
+      } else {
+        replyDiv.innerHTML = '<p>暂无讲解内容。</p>';
+      }
+
+      // Open this panel
+      panel.classList.add('open');
+
+      // Handle close button
+      var closeBtn = panel.querySelector('.close-btn');
+      if(closeBtn){
+        closeBtn.addEventListener('click', function(ce){
+          ce.stopPropagation();
+          panel.classList.remove('open');
+        });
+      }
+
+      // Handle follow-up question
+      var askBtn = panel.querySelector('.ask-box button');
+      var askInput = panel.querySelector('.ask-box input');
+      if(askBtn && askInput){
+        // Remove old event listener by cloning
+        var newAskBtn = askBtn.cloneNode(true);
+        askBtn.parentNode.replaceChild(newAskBtn, askBtn);
+        var newAskInput = askInput.cloneNode(true);
+        askInput.parentNode.replaceChild(newAskInput, askInput);
+
+        newAskBtn.addEventListener('click', function(){
+          var question = newAskInput.value.trim();
+          if(!question){
+            newAskInput.focus();
+            return;
+          }
+          // Disable button during request
+          newAskBtn.disabled = true;
+          newAskBtn.textContent = '…';
+          newAskInput.disabled = true;
+
+          var xhr = new XMLHttpRequest();
+          xhr.open('POST', '/api/ask', true);
+          xhr.setRequestHeader('Content-Type', 'application/json');
+          xhr.onload = function(){
+            newAskBtn.disabled = false;
+            newAskBtn.textContent = '提问';
+            newAskInput.disabled = false;
+            if(xhr.status >= 200 && xhr.status < 300){
+              var data = JSON.parse(xhr.responseText);
+              var reply = data.reply || data.message || '暂无回复。';
+              var replyInner = replyDiv.innerHTML + '<div style="margin-top:12px;padding-top:12px;border-top:1px solid rgba(255,255,255,0.06);"><strong style="color:#ffd93d;">Q:</strong> ' + escapeHtml(question) + '</div><div style="margin-top:6px;"><strong style="color:#6bcbff;">A:</strong> ' + reply + '</div>';
+              replyDiv.innerHTML = replyInner;
+              renderMath(replyDiv);
+              newAskInput.value = '';
+            } else {
+              replyDiv.innerHTML += '<div style="color:rgba(255,107,107,0.7);margin-top:8px;">请求失败了，请重试。</div>';
+            }
+          };
+          xhr.onerror = function(){
+            newAskBtn.disabled = false;
+            newAskBtn.textContent = '提问';
+            newAskInput.disabled = false;
+            replyDiv.innerHTML += '<div style="color:rgba(255,107,107,0.7);margin-top:8px;">网络错误，请重试。</div>';
+          };
+          xhr.send(JSON.stringify({question: question}));
+        });
+
+        newAskInput.addEventListener('keydown', function(ke){
+          if(ke.key === 'Enter'){
+            newAskBtn.click();
+          }
+        });
+      }
+    });
+  });
+})();
+
+// Helper: escape HTML to prevent injection
+function escapeHtml(text){
+  var div = document.createElement('div');
+  div.appendChild(document.createTextNode(text));
+  return div.innerHTML;
+}
+
+// ═════════════════════════════════════════════════════════
+// 7. Molecular Simulation Canvas — 80 particles, temperature
+// ═════════════════════════════════════════════════════════
+(function(){
+  var mc = document.getElementById('mc');
+  if(!mc) return;
+  var mctx = mc.getContext('2d');
+  var MW = mc.width, MH = mc.height;
+  var NUM_PARTICLES = 80;
+  var T = 300; // current temperature
+
+  // Particles array
+  var particles = [];
+  function initParticles(){
+    particles = [];
+    for(var i = 0; i < NUM_PARTICLES; i++){
+      particles.push({
+        x: 20 + Math.random() * (MW - 40),
+        y: 20 + Math.random() * (MH - 40),
+        vx: (Math.random() - 0.5) * 2,
+        vy: (Math.random() - 0.5) * 2,
+        r: 2.5 + Math.random() * 1.5
+      });
+    }
+  }
+  initParticles();
+
+  // Color interpolation based on temperature
+  function getColor(t){
+    var ratio = t / 1000;
+    if(ratio < 0) ratio = 0;
+    if(ratio > 1) ratio = 1;
+
+    var r, g, b;
+    if(ratio < 0.5){
+      // Blue -> Yellow
+      var p = ratio * 2;
+      r = Math.floor(107 + (255 - 107) * p);
+      g = Math.floor(203 + (217 - 203) * p);
+      b = Math.floor(255 - (255 - 50) * p);
+    } else {
+      // Yellow -> Red
+      var p = (ratio - 0.5) * 2;
+      r = 255;
+      g = Math.floor(217 - (217 - 107) * p);
+      b = Math.floor(50 - 50 * p);
+    }
+    return {r: r, g: g, b: b};
+  }
+
+  // Calculate approximate entropy based on velocity distribution
+  function calcEntropy(t){
+    // Simple model: entropy scales with log(variance)
+    // Higher temp -> higher entropy
+    var base = 2.0;
+    var maxE = 8.0;
+    var ratio = t / 1000;
+    return base + (maxE - base) * Math.pow(ratio, 0.6);
+  }
+
+  // Entropy display
+  var ev = document.getElementById('ev');
+  var td = document.getElementById('td');
+  var ts = document.getElementById('ts');
+
+  if(ts){
+    ts.addEventListener('input', function(){
+      T = parseFloat(ts.value);
+      if(td) td.textContent = Math.round(T) + ' K';
+      if(ev) ev.textContent = calcEntropy(T).toFixed(2);
+    });
+  }
+
+  // Temperature slider value display
+  function updateSpeedFactor(temp){
+    // Speed scales with sqrt(T)
+    var baseSpeed = Math.sqrt(temp / 300);
+    return baseSpeed;
+  }
+
+  function animateMC(){
+    mctx.clearRect(0, 0, MW, MH);
+
+    // Background
+    var bg = mctx.createRadialGradient(MW/2, MH/2, 0, MW/2, MH/2, MW/2);
+    bg.addColorStop(0, '#1a1a3e');
+    bg.addColorStop(1, '#0a0a1a');
+    mctx.fillStyle = bg;
+    mctx.fillRect(0, 0, MW, MH);
+
+    var speedFactor = updateSpeedFactor(T);
+    var color = getColor(T);
+
+    // Update particles
+    for(var i = 0; i < particles.length; i++){
+      var p = particles[i];
+
+      // Apply temperature-dependent speed
+      p.x += p.vx * speedFactor;
+      p.y += p.vy * speedFactor;
+
+      // Bounce off walls (with slight randomization for realism)
+      if(p.x < p.r){
+        p.x = p.r;
+        p.vx = Math.abs(p.vx) * (0.95 + Math.random() * 0.1);
+      }
+      if(p.x > MW - p.r){
+        p.x = MW - p.r;
+        p.vx = -Math.abs(p.vx) * (0.95 + Math.random() * 0.1);
+      }
+      if(p.y < p.r){
+        p.y = p.r;
+        p.vy = Math.abs(p.vy) * (0.95 + Math.random() * 0.1);
+      }
+      if(p.y > MH - p.r){
+        p.y = MH - p.r;
+        p.vy = -Math.abs(p.vy) * (0.95 + Math.random() * 0.1);
+      }
+
+      // Draw particle
+      var alpha = 0.5 + p.r / 4;
+      mctx.beginPath();
+      mctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+
+      // Glow effect
+      var glowR = p.r * 3;
+      var grad = mctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, glowR);
+      grad.addColorStop(0, 'rgba(' + color.r + ',' + color.g + ',' + color.b + ',0.25)');
+      grad.addColorStop(1, 'rgba(' + color.r + ',' + color.g + ',' + color.b + ',0)');
+      mctx.fillStyle = grad;
+      mctx.beginPath();
+      mctx.arc(p.x, p.y, glowR, 0, Math.PI * 2);
+      mctx.fill();
+
+      // Particle body
+      mctx.beginPath();
+      mctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+      mctx.fillStyle = 'rgba(' + color.r + ',' + color.g + ',' + color.b + ',' + alpha + ')';
+      mctx.fill();
+
+      // Bright center dot
+      mctx.beginPath();
+      mctx.arc(p.x, p.y, p.r * 0.35, 0, Math.PI * 2);
+      mctx.fillStyle = 'rgba(255,255,255,' + (0.3 + 0.2 * (T/1000)) + ')';
+      mctx.fill();
+    }
+
+    // Draw container border (subtle)
+    mctx.strokeStyle = 'rgba(255,255,255,0.06)';
+    mctx.lineWidth = 1;
+    mctx.strokeRect(5, 5, MW-10, MH-10);
+
+    // Temperature label
+    var ratio = T / 1000;
+    mctx.fillStyle = 'rgba(255,255,255,0.12)';
+    mctx.font = '10px sans-serif';
+    mctx.textAlign = 'center';
+    mctx.fillText('T = ' + Math.round(T) + ' K', MW/2, MH - 8);
+
+    requestAnimationFrame(animateMC);
+  }
+
+  animateMC();
+})();
+</script>
+</body>
+</html>
