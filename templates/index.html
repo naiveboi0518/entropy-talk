@@ -245,7 +245,6 @@ h2 .hl{color:#ff6b6b;}
 <body>
 <div class="topbar"><span>熵 · 物理pre</span><a href="http://47.107.36.34" target="_blank">📚 期末复习站 →</a></div>
 <div class="progress" id="progress"></div>
-<button class="script-toggle" id="scriptToggle">📜 讲解词</button>
 
 <!-- HERO -->
 <div class="hero">
@@ -397,8 +396,6 @@ h2 .hl{color:#ff6b6b;}
   </div>
 </div></section>
 
-<!-- Sticky notes panel -->
-<div class="sticky-notes" id="stickyNotes"><div class="script">这是预留给讲解词的区域。</div></div>
 
 <script>
 // ═════════════════════════════════════════════════════════
@@ -457,27 +454,9 @@ h2 .hl{color:#ff6b6b;}
   });
 })();
 
-// ═════════════════════════════════════════════════════════
-// 4. Script toggle — show/hide sticky notes
-// ═════════════════════════════════════════════════════════
-(function(){
-  var toggle = document.getElementById('scriptToggle');
-  var notes = document.getElementById('stickyNotes');
-  if(toggle && notes){
-    toggle.addEventListener('click', function(){
-      notes.classList.toggle('show');
-      toggle.classList.toggle('on');
-      if(notes.classList.contains('show')){
-        toggle.textContent = '📜 隐藏讲解词';
-      } else {
-        toggle.textContent = '📜 讲解词';
-      }
-    });
-  }
-})();
 
 // ═════════════════════════════════════════════════════════
-// 5. ICE MELT CANVAS — roundRect + full animation
+// 4. ICE MELT CANVAS — roundRect + full animation
 // ═════════════════════════════════════════════════════════
 (function(){
   var ic = document.getElementById('iceCanvas');
