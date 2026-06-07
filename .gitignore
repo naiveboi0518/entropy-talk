@@ -1,0 +1,9 @@
+*.pyc
+__pycache__/
+.venv/
+.key
+*.tar.gz
+gen*.py
+regen_images.py
+generate_cards.py
+generate_images.py
